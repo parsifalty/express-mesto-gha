@@ -1,11 +1,9 @@
-const User = require("../models/user");
+const User = require('../models/user');
 
 module.exports.getUser = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.getUserById = (req, res) => {
@@ -15,20 +13,18 @@ module.exports.getUserById = (req, res) => {
         if (!user) {
           res
             .status(404)
-            .send({ message: "Пользователь с этим айди не найден" });
+            .send({ message: 'Пользователь с этим айди не найден' });
         } else {
           res.send(user);
         }
       })
-      .catch(() =>
-        res
-          .status(404)
-          .send({ message: "Пользователь с данным айди не найден" })
-      );
+      .catch(() => res
+        .status(404)
+        .send({ message: 'Пользователь с данным айди не найден' }));
   } else {
     res
       .status(400)
-      .send({ message: "Неккоректный айди пользователя был указан вами" });
+      .send({ message: 'Неккоректный айди пользователя был указан вами' });
   }
 };
 
@@ -46,20 +42,20 @@ module.exports.editUserData = (req, res) => {
     User.findByIdAndUpdate(
       req.user._id,
       { name, about },
-      { new: "true", runValidators: true }
+      { new: 'true', runValidators: true },
     )
       .then((user) => res.send(user))
       .catch((err) => {
-        if (err.name === "ValidationError") {
+        if (err.name === 'ValidationError') {
           res.status(400).send({ message: err.message });
         } else {
           res
             .status(404)
-            .send({ message: "Пользователь с данным айди не найден" });
+            .send({ message: 'Пользователь с данным айди не найден' });
         }
       });
   } else {
-    res.status(500).send({ message: "На сервере произошла ошибка" });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -68,19 +64,19 @@ module.exports.editUserAvatar = (req, res) => {
     User.findByIdAndUpdate(
       req.user._id,
       { avatar: req.body.avatar },
-      { new: "true", runValidators: true }
+      { new: 'true', runValidators: true },
     )
       .then((user) => res.status(200).send(user))
       .catch((err) => {
-        if (err.name === "ValidationError") {
+        if (err.name === 'ValidationError') {
           res.status(400).send({ message: err.message });
         } else {
           res
             .status(404)
-            .send({ message: "Пользователь с данным айди не найден" });
+            .send({ message: 'Пользователь с данным айди не найден' });
         }
       });
   } else {
-    res.status(500).send({ message: "На сервере произошла ошибка" });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
