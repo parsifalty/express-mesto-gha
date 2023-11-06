@@ -50,7 +50,7 @@ module.exports.editUserData = (req, res) => {
     )
       .then((user) => res.send(user))
       .catch((err) => {
-        if (err.name === "ValidationErorr") {
+        if (err.name === "ValidationError") {
           res.status(400).send({ message: err.message });
         } else {
           res
@@ -72,7 +72,7 @@ module.exports.editUserAvatar = (req, res) => {
     )
       .then((user) => res.status(200).send(user))
       .catch((err) => {
-        if (err.name === "ValidationErorr") {
+        if (err.name === "ValidationError") {
           res.status(400).send({ message: err.message });
         } else {
           res

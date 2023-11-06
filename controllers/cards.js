@@ -21,7 +21,7 @@ module.exports.addCard = (req, res) => {
         );
     })
     .catch((err) => {
-      if (err.name === "ValidationErorr") {
+      if (err.name === "ValidationError") {
         res.status(400).send({ message: err.message });
       } else {
         res.status(500).send({ message: "На сервере произошла ошибка" });
@@ -64,7 +64,7 @@ module.exports.likeCard = (req, res) => {
       .then((card) => {
         if (!card) {
           res
-            .status(400)
+            .status(404)
             .send({ message: "Карточка с данным айди не была найдена" });
         } else {
           res.status(200).send(card);
@@ -94,9 +94,8 @@ module.exports.dislikeCard = (req, res) => {
         if (!card) {
           res.status(400).send({ message: "Неправильный айди у карты" });
           return;
-        } else {
-          res.status(200).send(card);
         }
+        res.status(200).send(card);
       })
       .catch(() =>
         res
@@ -104,6 +103,6 @@ module.exports.dislikeCard = (req, res) => {
           .send({ message: "Карточка с данным айди не была найдена" })
       );
   } else {
-    res.status(404).send({ message: "Неправильный айди у карты" });
+    res.status(400).send({ message: "Неправильный айди у карты" });
   }
 };
