@@ -27,7 +27,7 @@ module.exports.getUserById = (req, res) => {
       );
   } else {
     res
-      .status(404)
+      .status(400)
       .send({ message: "Неккоректный айди пользователя был указан вами" });
   }
 };
@@ -51,7 +51,7 @@ module.exports.editUserData = (req, res) => {
       .then((user) => res.send(user))
       .catch((err) => {
         if (err.name === "ValidationErorr") {
-          res.status(404).send({ message: err.message });
+          res.status(400).send({ message: err.message });
         } else {
           res
             .status(404)
@@ -73,7 +73,7 @@ module.exports.editUserAvatar = (req, res) => {
       .then((user) => res.status(200).send(user))
       .catch((err) => {
         if (err.name === "ValidationErorr") {
-          res.status(404).send({ message: err.message });
+          res.status(400).send({ message: err.message });
         } else {
           res
             .status(404)
