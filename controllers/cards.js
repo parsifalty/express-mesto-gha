@@ -67,7 +67,7 @@ module.exports.likeCard = (req, res) => {
             .status(404)
             .send({ message: "Карточка с данным айди не была найдена" });
         } else {
-          res.send(card);
+          res.status(200).send(card);
         }
       })
       .catch(() =>
@@ -95,7 +95,7 @@ module.exports.dislikeCard = (req, res) => {
           res.status(404).send({ message: "Неправильный айди у карты" });
           return;
         } else {
-          res.send(card);
+          res.status(200).send(card);
         }
       })
       .catch(() =>
@@ -104,6 +104,6 @@ module.exports.dislikeCard = (req, res) => {
           .send({ message: "Карточка с данным айди не была найдена" })
       );
   } else {
-    res.status(400).send({ message: "Неправильный айди у карты" });
+    res.status(404).send({ message: "Неправильный айди у карты" });
   }
 };
