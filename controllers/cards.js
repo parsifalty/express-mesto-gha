@@ -35,7 +35,7 @@ module.exports.deleteCard = (req, res) => {
       .then((card) => {
         if (!card) {
           res
-            .status(400)
+            .status(404)
             .send({ message: "Карточка с данным айди не найдена" });
         } else {
           res.send({ message: "Карточка удалена" });
@@ -92,7 +92,7 @@ module.exports.dislikeCard = (req, res) => {
       .populate(["owner, likes"])
       .then((card) => {
         if (!card) {
-          res.status(400).send({ message: "Неправильный айди у карты" });
+          res.status(404).send({ message: "Неправильный айди у карты" });
           return;
         }
         res.status(200).send(card);
