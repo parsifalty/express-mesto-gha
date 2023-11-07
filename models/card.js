@@ -4,12 +4,12 @@ const cardSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      minlength: 2,
-      maxlength: 30,
-      required: true,
+      minlength: [2, 'Минимальная длина поля должна быть не менее 2'],
+      maxlength: [30, 'Максимальная длина поля должна быть не более 30'],
+      required: [true, 'обязательное поле'],
     },
     link: {
-      required: true,
+      required: [true, 'обязательное поле'],
       type: String,
       validate: {
         validator(url) {
@@ -23,10 +23,11 @@ const cardSchema = mongoose.Schema(
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
-      required: true,
+      required: [true, 'обязательное поле'],
     },
     likes: {
       type: [mongoose.Schema.Types.ObjectId],
+      ref: 'user',
       default: [],
     },
     createdAt: {
