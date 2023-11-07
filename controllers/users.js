@@ -1,23 +1,32 @@
 const User = require('../models/user');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
+const {
+  BAD_REQUEST_STATUS,
+  SERVER_ERROR_STATUS,
+  VALIDATION_ERROR_STATUS,
+} = require('../constants');
 
 module.exports.getUser = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(() => res
+      .status(SERVER_ERROR_STATUS)
+      .send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь с этим айди не найден');
+        res
+          .status(BAD_REQUEST_STATUS)
+          .send({ message: 'Пользователь с этим айди не найден' });
       } else {
         res.send(user);
       }
     })
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(() => res
+      .status(SERVER_ERROR_STATUS)
+      .send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.addUser = (req, res) => {
@@ -25,13 +34,7 @@ module.exports.addUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new ValidationError(
-          'Переданы некорректные данные при создании пользователя',
-        );
-      }
-    });
+    .catch((err) => res.status(VALIDATION_ERROR_STATUS).send({ message: err.message }));
 };
 
 module.exports.editUserData = (req, res) => {
@@ -45,13 +48,17 @@ module.exports.editUserData = (req, res) => {
       .then((user) => res.send(user))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          throw new ValidationError(err.message);
+          res.status(VALIDATION_ERROR_STATUS).send({ message: err.message });
         } else {
-          throw new NotFoundError('Пользователь с этим айди не был найден');
+          res
+            .status(BAD_REQUEST_STATUS)
+            .send({ message: 'Пользователь с данным айди не найден' });
         }
       });
   } else {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    res
+      .status(SERVER_ERROR_STATUS)
+      .send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -65,12 +72,16 @@ module.exports.editUserAvatar = (req, res) => {
       .then((user) => res.status(200).send(user))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          throw new ValidationError(err.message);
+          res.status(VALIDATION_ERROR_STATUS).send({ message: err.message });
         } else {
-          throw new NotFoundError('Пользователь с этим айди не был найден');
+          res
+            .status(BAD_REQUEST_STATUS)
+            .send({ message: 'Пользователь с данным айди не найден' });
         }
       });
   } else {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    res
+      .status(SERVER_ERROR_STATUS)
+      .send({ message: 'На сервере произошла ошибка' });
   }
 };
