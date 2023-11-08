@@ -27,18 +27,16 @@ module.exports.addCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(VALIDATION_ERROR_STATUS)
+          .status(CAST_ERROR_STATUS)
           .send({ message: 'Карточка с этим айди не найдена' });
+      } else if (err.name === 'ValidationError') {
+        res.status(VALIDATION_ERROR_STATUS).send({ message: err.message });
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_STATUS).send({ message: err.message });
-      } else {
-        res
-          .status(SERVER_ERROR_STATUS)
-          .send({ message: 'На сервере произошла ошибка' });
-      }
+    .catch(() => {
+      res
+        .status(SERVER_ERROR_STATUS)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 };
 
