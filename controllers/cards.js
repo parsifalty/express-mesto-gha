@@ -43,7 +43,13 @@ module.exports.addCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then(() => res.send({ message: 'Карточка удалена' }))
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_STATUS).send({ message: 'Карточка не найдена' });
+      } else {
+        res.send({ message: 'Карточка удалена' });
+      }
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
@@ -65,7 +71,7 @@ module.exports.likeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!req.params.cardID) {
+      if (!card) {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'Карочка с данным айди не найдена' });
@@ -94,7 +100,7 @@ module.exports.dislikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!req.params.cardID) {
+      if (!card) {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'карточка с данным айди не найдена' });
