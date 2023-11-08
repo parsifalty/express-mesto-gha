@@ -1,15 +1,16 @@
 const Card = require('../models/card');
 const {
-  BAD_REQUEST_STATUS,
   SERVER_ERROR_STATUS,
   VALIDATION_ERROR_STATUS,
+  SUCCESS_STATUS,
+  CREATED_STATUS,
   CAST_ERROR_STATUS,
 } = require('../constants');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate(['owner', 'likes'])
-    .then((cards) => res.send(cards))
+    .then((cards) => res.status(SUCCESS_STATUS).send(cards))
     .catch(() => res
       .status(SERVER_ERROR_STATUS)
       .send({ message: 'На сервере произошла ошибка' }));
@@ -21,10 +22,14 @@ module.exports.addCard = (req, res) => {
     .then((card) => {
       Card.findById(card._id)
         .populate('owner')
-        .then((data) => res.status(201).send(data))
-        .catch(() => res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Карточка с этим айди не найдена' }));
+        .then((data) => res.status(CREATED_STATUS).send(data));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(VALIDATION_ERROR_STATUS)
+          .send({ message: 'Карточка с этим айди не найдена' });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -39,18 +44,18 @@ module.exports.addCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
+    .then(() => res.send({ message: 'Карточка удалена' }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
         res
-          .status(BAD_REQUEST_STATUS)
-          .send({ message: 'Карточка с данным айди не найдена' });
+          .status(CAST_ERROR_STATUS)
+          .send({ message: 'карточка с данным айди не найдена' });
       } else {
-        res.send({ message: 'Карточка удалена' });
+        res
+          .status(SERVER_ERROR_STATUS)
+          .send({ message: 'На сервере произошла ошибка' });
       }
-    })
-    .catch(() => res
-      .status(SERVER_ERROR_STATUS)
-      .send({ message: 'На сервере произошла ошибка' }));
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -61,16 +66,19 @@ module.exports.likeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!card) {
-        res
-          .status(BAD_REQUEST_STATUS)
-          .send({ message: 'Карточка с данным айди не была найдена' });
-      }
-      res.status(200).send(card);
+      res.status(SUCCESS_STATUS).send(card);
     })
-    .catch(() => res
-      .status(SERVER_ERROR_STATUS)
-      .send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(CAST_ERROR_STATUS)
+          .send({ message: 'Карточка с данным айди не была найдена' });
+      } else {
+        res
+          .status(SERVER_ERROR_STATUS)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -81,15 +89,17 @@ module.exports.dislikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!card) {
-        res
-          .status(BAD_REQUEST_STATUS)
-          .send({ message: 'Неправильный айди у карты' });
-        return;
-      }
-      res.send(card);
+      res.status(SUCCESS_STATUS).send(card);
     })
-    .catch(() => res
-      .status(SERVER_ERROR_STATUS)
-      .send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(CAST_ERROR_STATUS)
+          .send({ message: 'Карточка с данным айди не была найдена' });
+      } else {
+        res
+          .status(SERVER_ERROR_STATUS)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
