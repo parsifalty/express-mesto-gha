@@ -69,8 +69,9 @@ module.exports.likeCard = (req, res) => {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'Карочка с данным айди не найдена' });
+      } else {
+        res.status(SUCCESS_STATUS).send(card);
       }
-      res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -93,12 +94,13 @@ module.exports.dislikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!req.params.cardId) {
+      if (!req.params.cardID) {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'карточка с данным айди не найдена' });
+      } else {
+        res.status(SUCCESS_STATUS).send(card);
       }
-      res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
