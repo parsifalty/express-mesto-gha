@@ -5,6 +5,7 @@ const {
   SUCCESS_STATUS,
   CREATED_STATUS,
   CAST_ERROR_STATUS,
+  NOT_FOUND_STATUS,
 } = require('../constants');
 
 module.exports.getCards = (req, res) => {
@@ -64,6 +65,11 @@ module.exports.likeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
+      if (!req.params.cardID) {
+        res
+          .status(NOT_FOUND_STATUS)
+          .send({ message: 'Карочка с данным айди не найдена' });
+      }
       res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {
@@ -87,6 +93,11 @@ module.exports.dislikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .then((card) => {
+      if (!req.params.cardId) {
+        res
+          .status(NOT_FOUND_STATUS)
+          .send({ message: 'карточка с данным айди не найдена' });
+      }
       res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {

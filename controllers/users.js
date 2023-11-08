@@ -5,6 +5,7 @@ const {
   SUCCESS_STATUS,
   CREATED_STATUS,
   CAST_ERROR_STATUS,
+  NOT_FOUND_STATUS,
 } = require('../constants');
 
 module.exports.getUser = (req, res) => {
@@ -18,6 +19,11 @@ module.exports.getUser = (req, res) => {
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
+      if (!user) {
+        res
+          .status(NOT_FOUND_STATUS)
+          .send({ message: 'Пользователь не найден с данным айди' });
+      }
       res.status(SUCCESS_STATUS).send(user);
     })
     .catch((err) => {
