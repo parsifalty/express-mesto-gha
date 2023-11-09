@@ -19,27 +19,19 @@ module.exports.getCards = (req, res) => {
 module.exports.addCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
-      Card.findById(card._id)
-        .populate('owner')
-        .then((data) => {
-          if (!card) {
-            res
-              .status(NOT_FOUND_STATUS)
-              .send({ message: 'Карточка не была найдена по айди' });
-            return;
-          }
-          res.status(CREATED_STATUS).send(data);
-        });
-    })
+    .then((card) => Card.findById(card._id)
+      .populate('owner')
+      .then((data) => {
+        res.status(CREATED_STATUS).send(data);
+      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_STATUS).send({ message: err.message });
-      } else {
-        res
-          .status(SERVER_ERROR_STATUS)
-          .send({ message: 'На сервере произошла ошибка' });
+        return;
       }
+      res
+        .status(SERVER_ERROR_STATUS)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 };
 
