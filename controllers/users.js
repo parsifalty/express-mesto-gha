@@ -1,10 +1,9 @@
 const User = require('../models/user');
 const {
   SERVER_ERROR_STATUS,
-  VALIDATION_ERROR_STATUS,
+  BAD_REQUEST_STATUS,
   SUCCESS_STATUS,
   CREATED_STATUS,
-  CAST_ERROR_STATUS,
   NOT_FOUND_STATUS,
 } = require('../constants');
 
@@ -23,13 +22,14 @@ module.exports.getUserById = (req, res) => {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'Пользователь не найден с данным айди' });
+        return;
       }
       res.status(SUCCESS_STATUS).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(CAST_ERROR_STATUS)
+          .status(BAD_REQUEST_STATUS)
           .send({ message: 'Пользователь с этим айди не найден' });
       } else {
         res
@@ -44,7 +44,15 @@ module.exports.addUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.status(CREATED_STATUS).send({ data: user }))
-    .catch((err) => res.status(VALIDATION_ERROR_STATUS).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST_STATUS).send({ message: err.message });
+      } else {
+        res
+          .status(SERVER_ERROR_STATUS)
+          .send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.editUserData = (req, res) => {
@@ -56,12 +64,8 @@ module.exports.editUserData = (req, res) => {
   )
     .then((user) => res.status(SUCCESS_STATUS).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Пользователь с данным айди не найден' });
-      } else if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_STATUS).send({ message: err.name });
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST_STATUS).send({ message: err.name });
       } else {
         res
           .status(SERVER_ERROR_STATUS)
@@ -78,12 +82,8 @@ module.exports.editUserAvatar = (req, res) => {
   )
     .then((user) => res.status(SUCCESS_STATUS).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Пользователь с данным айди не найден' });
-      } else if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_STATUS).send({ message: err.name });
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST_STATUS).send({ message: err.name });
       } else {
         res
           .status(SERVER_ERROR_STATUS)

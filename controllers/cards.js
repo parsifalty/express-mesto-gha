@@ -1,10 +1,9 @@
 const Card = require('../models/card');
 const {
   SERVER_ERROR_STATUS,
-  VALIDATION_ERROR_STATUS,
+  BAD_REQUEST_STATUS,
   SUCCESS_STATUS,
   CREATED_STATUS,
-  CAST_ERROR_STATUS,
   NOT_FOUND_STATUS,
 } = require('../constants');
 
@@ -23,21 +22,24 @@ module.exports.addCard = (req, res) => {
     .then((card) => {
       Card.findById(card._id)
         .populate('owner')
-        .then((data) => res.status(CREATED_STATUS).send(data));
+        .then((data) => {
+          if (!card) {
+            res
+              .status(NOT_FOUND_STATUS)
+              .send({ message: 'Карточка не была найдена по айди' });
+            return;
+          }
+          res.status(CREATED_STATUS).send(data);
+        });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST_STATUS).send({ message: err.message });
+      } else {
         res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Карточка с этим айди не найдена' });
-      } else if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_STATUS).send({ message: err.message });
+          .status(SERVER_ERROR_STATUS)
+          .send({ message: 'На сервере произошла ошибка' });
       }
-    })
-    .catch(() => {
-      res
-        .status(SERVER_ERROR_STATUS)
-        .send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -46,15 +48,15 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND_STATUS).send({ message: 'Карточка не найдена' });
-      } else {
-        res.send({ message: 'Карточка удалена' });
+        return;
       }
+      res.send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'карточка с данным айди не найдена' });
+          .status(BAD_REQUEST_STATUS)
+          .send({ message: 'Передан неверный айди' });
       } else {
         res
           .status(SERVER_ERROR_STATUS)
@@ -75,15 +77,15 @@ module.exports.likeCard = (req, res) => {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'Карочка с данным айди не найдена' });
-      } else {
-        res.status(SUCCESS_STATUS).send(card);
+        return;
       }
+      res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Карточка с данным айди не была найдена' });
+          .status(BAD_REQUEST_STATUS)
+          .send({ message: 'Передан неверный айди' });
       } else {
         res
           .status(SERVER_ERROR_STATUS)
@@ -104,15 +106,15 @@ module.exports.dislikeCard = (req, res) => {
         res
           .status(NOT_FOUND_STATUS)
           .send({ message: 'карточка с данным айди не найдена' });
-      } else {
-        res.status(SUCCESS_STATUS).send(card);
+        return;
       }
+      res.status(SUCCESS_STATUS).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(CAST_ERROR_STATUS)
-          .send({ message: 'Карточка с данным айди не была найдена' });
+          .status(BAD_REQUEST_STATUS)
+          .send({ message: 'Передан неверный айди' });
       } else {
         res
           .status(SERVER_ERROR_STATUS)
