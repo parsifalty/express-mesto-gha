@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
-const isEmail = require('validator/lib/isEmail');
-const bcrypt = require('bcrypt');
+// const isEmail = require("validator/lib/isEmail");
+const bcrypt = require('bcryptjs');
+// const validator = require("validator");
+const { UnauthorizedError } = require('../errors/UnauthorizedError');
+const { NotFoundError } = require('../errors/NotFoundError');
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,13 +24,16 @@ const userSchema = new mongoose.Schema(
       required: [true, 'обязательное поле'],
       unique: true,
       validate: {
-        validator: (v) => isEmail(v),
-        message: 'Неправильный формат почты',
+        validator(email) {
+          // validator.isEmail(email);
+          return /^\S+@\S+\.\S+$/.test(email);
+        },
+        message: 'введите свой email',
       },
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'поле должно быть заполнено'],
       select: false,
       minlength: [8, 'Минимвльная длина пароля 8 символов'],
     },
@@ -48,18 +54,23 @@ const userSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).then((user) => {
-    if (!user) {
-      return { message: 'Неправильная почта или пароль' };
-    }
-    return bcrypt.compare(password, user.password).then((matched) => {
-      if (!matched) {
-        return { message: 'Неправильная почта или пароль' };
+userSchema.statics.findUserByCredentials = function findUserByCredentials(
+  email,
+  password,
+) {
+  return this.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
       }
-      return user;
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new UnauthorizedError('пользователь не авторизирован');
+        }
+        return user;
+      });
     });
-  });
 };
 
 module.exports = mongoose.model('user', userSchema);
